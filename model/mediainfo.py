@@ -10,6 +10,7 @@ class MediaInfo(Base):
 
 	id=Column(Integer,primary_key=True)
 	title=Column(String)
+	page_url=Column(String,unique=True)
 	eName=Column(String)
 	otherName=Column(String)
 	adaptor=Column(String)
@@ -29,7 +30,13 @@ class MediaInfo(Base):
 	licence=Column(String)
 	registration=Column(String)
 	distributColtd=Column(String)
+	totalNumber=Column(String)
+	updateInfo=Column(String)
+	area=Column(String)
 	source=Column(Integer)
 	createTime=Column(DateTime)
 	updateTime=Column(DateTime)
 	updator=Column(String)
+
+	def to_dict(self):
+		return {c.name: getattr(self, c.name, None) for c in self.__table__.columns}

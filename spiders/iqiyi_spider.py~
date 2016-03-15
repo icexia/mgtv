@@ -41,87 +41,146 @@ class MgtvSpider(CrawlSpider):
 	name="Mgtv"
 
 	def __init__(self,rule):
-		super(MgtvSpider,self).__init__()
 		self.rule=rule
 		self.name=rule.spider_name
-		# self.allowed_domains=rule.allowed_domains
-		self.allowed_domains=['v.ifeng.com']
-		# self.start_urls=rule.start_urls
-		self.start_urls=['http://v.ifeng.com/vlist/nav/movie/update/1/list.shtml']
+		self.allowed_domains=rule.allowed_domains.split(",")
+		self.start_urls=rule.start_urls.split(",")
 		rule_list=[]
 
+		# if rule.next_page_xpath:
+		# 	rule_list.append(Rule(LinkExtractor(restrict_xpaths=rule.next_page_xpath)))
 		rule_list.append(Rule(LinkExtractor(
-			allow=("http://v\.ifeng\.com/movie/201411/", )),
+			allow=[rule.allow_url]),
 			callback='parse_movies_item'))
 		self.rules=tuple(rule_list)
-		# self.rules=[
-		# 	Rule(LinkExtractor(allow=("http://v\.ifeng\.com/movie/201411/", )), callback='parse_movies_item'),
-		# ]
+		super(MgtvSpider,self).__init__()
 
 
 	def parse_movies_item(self,response):
-		print response.url
 		item=MediaItem()
-		title=response.xpath(self.rule.title_xpath).extract()
-		item['title']=title if title else ""
 
-		eName=response.xpath(self.rule.e_name_xpath).extract()
-		item['eName']=eName if  eName else ""
+		if self.rule.title_xpath:
+			title=response.xpath(self.rule.title_xpath).extract()
+			item['title']=title if title else ""
+		else:
+			item['title']=""
 
-		otherName=response.xpath(self.rule.other_name_xpath).extract()
-		item['otherName']=otherName if otherName else ""
+		item['url']=response.url
 
-		adaptor=response.xpath(self.rule.adaptor_xpath).extract()
-		item['adaptor']=adaptor if adaptor else ""
+		if self.rule.e_name_xpath:
+			eName=response.xpath(self.rule.e_name_xpath).extract()
+			item['eName']=eName if  eName else ""
+		else:
+			item['eName']=""
+
+		if self.rule.other_name_xpath:
+			otherName=response.xpath(self.rule.other_name_xpath).extract()
+			item['otherName']=otherName if otherName else ""
+		else:
+			item['otherName']=""
+
+		if self.rule.adaptor_xpath:
+			adaptor=response.xpath(self.rule.adaptor_xpath).extract()
+			item['adaptor']=adaptor if adaptor else ""
+		else:
+			item['adaptor']=""
 		
-		director=response.xpath(self.rule.director_xpath).extract()
-		item['director']=director if director else ""
+		if self.rule.director_xpath:
+			director=response.xpath(self.rule.director_xpath).extract()
+			item['director']=director if director else ""
+		else:
+			item['director']=""
 		
-		leader=response.xpath(self.rule.leader_xpath).extract()
-		item['leader']=leader if leader else ""
+		if self.rule.leader_xpath:
+			leader=response.xpath(self.rule.leader_xpath).extract()
+			item['leader']=leader if leader else ""
+		else:
+			item['leader']=""
 			
-		kind=response.xpath(self.rule.kind_xpath).extract()
-		item['kind']=kind if kind else ""
+		if self.rule.kind_xpath:
+			kind=response.xpath(self.rule.kind_xpath).extract()
+			item['kind']=kind if kind else ""
+		else:
+			item['kind']=""
 		
-		language=response.xpath(self.rule.language_xpath).extract()
-		item['language']=language if language else ""
+		if self.rule.language_xpath:
+			language=response.xpath(self.rule.language_xpath).extract()
+			item['language']=language if language else ""
+		else:
+			item['language']=""
 		
-		duration=response.xpath(self.rule.duration_xpath).extract()
-		item['duration']=duration if duration else ""
+		if self.rule.duration_xpath:
+			duration=response.xpath(self.rule.duration_xpath).extract()
+			item['duration']=duration if duration else ""
+		else:
+			item['duration']=""
 		
-		story=response.xpath(self.rule.story_xpath).extract()
-		item['story']=story if story else ""
+		if self.rule.story_xpath:
+			story=response.xpath(self.rule.story_xpath).extract()
+			item['story']=story if story else ""
+		else:
+			item['story']=""
 		
-		keyWord=response.xpath(self.rule.keyWord_xpath).extract()
-		item['keyWord']=keyWord if keyWord else ""
+		if self.rule.keyWord_xpath:
+			keyWord=response.xpath(self.rule.keyWord_xpath).extract()
+			item['keyWord']=keyWord if keyWord else ""
+		else:
+			item['keyWord']=""
 		
-		productPerson=response.xpath(self.rule.product_person_xpath).extract()
-		item['productPerson']=productPerson if productPerson else ""
+		if self.rule.product_person_xpath:
+			productPerson=response.xpath(self.rule.product_person_xpath).extract()
+			item['productPerson']=productPerson if productPerson else ""
+		else:
+			item['productPerson']=""
 		
-		dubbing=response.xpath(self.rule.dubbing_xpath).extract()
-		item['dubbing']=dubbing if dubbing else ""
+		if self.rule.dubbing_xpath:
+			dubbing=response.xpath(self.rule.dubbing_xpath).extract()
+			item['dubbing']=dubbing if dubbing else ""
+		else:
+			item['dubbing']=""
 		
-		executiver=response.xpath(self.rule.executiver_xpath).extract()
-		item['executiver']=executiver if executiver else ""
-
-		original=response.xpath(self.rule.original_xpath).extract()
-		item['original']=original if original else ""
+		if self.rule.executiver_xpath:
+			executiver=response.xpath(self.rule.executiver_xpath).extract()
+			item['executiver']=executiver if executiver else ""
+		else:
+			item['executiver']=""
 		
-		productColtd=response.xpath(self.rule.productColtd_xpath).extract()
-		item['productColtd']=productColtd if productColtd else ""
+		if self.rule.original_xpath:
+			original=response.xpath(self.rule.original_xpath).extract()
+			item['original']=original if original else ""
+		else:
+			item['original']=""
 		
-		productionTime=response.xpath(self.rule.production_time_xpath).extract()
-		item['productionTime']=productionTime if productionTime else ""
+		if self.rule.productColtd_xpath:
+			productColtd=response.xpath(self.rule.productColtd_xpath).extract()
+			item['productColtd']=productColtd if productColtd else ""
+		else:
+			item['productColtd']=""
 		
-		licence=response.xpath(self.rule.licence_xpath).extract()
-		item['licence']=licence if licence else ""
+		if self.rule.production_time_xpath:
+			productionTime=response.xpath(self.rule.production_time_xpath).extract()
+			item['productionTime']=productionTime if productionTime else ""
+		else:
+			item['productionTime']=""
 		
-		registration=response.xpath(self.rule.registration_xpath).extract()
-		item['registration']=registration if registration else ""
+		if self.rule.licence_xpath:
+			licence=response.xpath(self.rule.licence_xpath).extract()
+			item['licence']=licence if licence else ""
+		else:
+			item['licence']=""
 		
-		distributColtd=response.xpath(self.rule.distributColtd_xpath).extract()
-		item['distributColtd']=distributColtd if distributColtd else ""
-
+		if self.rule.registration_xpath:
+			registration=response.xpath(self.rule.registration_xpath).extract()
+			item['registration']=registration if registration else ""
+		else:
+			item['registration']=""
+		
+		if self.rule.distributColtd_xpath:
+			distributColtd=response.xpath(self.rule.distributColtd_xpath).extract()
+			item['distributColtd']=distributColtd if distributColtd else ""
+		else:
+			item['distributColtd']=""
+		
 		return item
 
 

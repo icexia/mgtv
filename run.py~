@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from spiders.iqiyi_spider import MgtvSpider
+from spiders.baidu_spider import BaiduSpider
 from model.config import DBSession
 from model.rule import Rule
 from scrapy.crawler import CrawlerProcess
@@ -20,5 +21,8 @@ process = CrawlerProcess(settings)
 db = DBSession()
 rules = db.query(Rule).filter(Rule.status == 1)
 for rule in rules:
-	process.crawl(MgtvSpider,rule)
+	if rule.allowed_domains=='v.baidu.com':
+		process.crawl(BaiduSpider,rule)
+	else:
+		process.crawl(MgtvSpider,rule)
 process.start()
