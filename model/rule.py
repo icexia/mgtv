@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base=declarative_base()
 
 class Rule(Base):
-	__tablename__='MC_Spider_Rule'
+	__tablename__='mc_spider_rule'
 
 	#//表结构
 	id=Column(Integer,primary_key=True)
@@ -42,3 +42,6 @@ class Rule(Base):
 	status=Column(Integer)
 	spider_desc=Column(String)
 	create_time=Column(DateTime)
+	playTime_xpath=Column(String)
+	producer_xpath=Column(String)
+	television_xpath=Column(String)

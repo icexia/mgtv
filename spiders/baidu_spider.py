@@ -1,9 +1,14 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import division
 from scrapy.item import Item,Field
 from model.mediaItem import MediaItem
 from scrapy.spiders import Spider
 from scrapy.linkextractors import LinkExtractor
 from scrapy import signals, log
+from scrapy.http import Request
 import json
+import math
 
 import sys
 reload(sys)
@@ -11,17 +16,21 @@ sys.setdefaultencoding('utf-8')
 
 class BaiduSpider(Spider):
 	name="Baidu"
+	base_url=""
 
 	def __init__(self, rule=None, *args, **kwargs):
 		self.allowed_domains=['%s' % (rule.allowed_domains)]
 		self.start_urls=['%s' % (rule.start_urls)]
+		self.base_url=rule.start_urls
 		self.spider_desc=rule.spider_desc
 		super(BaiduSpider,self).__init__(*args, **kwargs)
 
 	def parse(self,response):
-		print 222222222222
-		
 		jsonresponse = json.loads(response.body_as_unicode())
+		total_url = 1
+		if jsonresponse.has_key('total_num'):
+			total_url = int(jsonresponse['total_num'])
+			total_url = math.floor(total_url/18)
 		if jsonresponse.has_key('videoshow'):
 			if jsonresponse['videoshow'].has_key('videos'):
 				for media in jsonresponse['videoshow']['videos']:
@@ -182,14 +191,30 @@ class BaiduSpider(Spider):
 					else:
 						item['area']=""
 
+					if media.has_key('playTime'):
+						item['playTime']=media['playTime'] if media['playTime'] else ""
+					else:
+						item['playTime']=""
+
+					if media.has_key('television'):
+						item['television']=media['television'] if media['television'] else ""
+					else:
+						item['television']=""
+
+					if media.has_key('producer'):
+						item['producer']=media['producer'] if media['producer'] else ""
+					else:
+						item['producer']=""
+
 					item['source']=self.spider_desc if self.spider_desc else ""
 				
 					yield item
 
-
-
-
-
-
-
-
+		next_urls=[]
+		count= int(total_url)
+		for k in xrange(2,count):
+			base_url=self.base_url+str(k)
+			next_urls.append(base_url)
+		for next_url in next_urls:
+			self.logger.info('---------------------------Fetch url : %s',next_url)
+			yield Request(next_url,callback=self.parse)

@@ -10,9 +10,16 @@ from model.config import DBSession
 from model.mediainfo import MediaInfo
 from search.es_access import import_to_es
 from datetime import datetime
+from scrapy import signals, log
+from scrapy.conf import settings
 import codecs
 import json
 import time
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 
 class MysqlPipeline(object):
 	def open_spider(self,spider):
@@ -48,6 +55,9 @@ class MysqlPipeline(object):
 			totalNumber=self.list_format(item['totalNumber'],spider),
 			updateInfo=self.list_format(item['updateInfo'],spider),
 			area=self.list_format(item['area'],spider),
+			playTime=self.list_format(item['playTime'],spider),
+			television=self.list_format(item['television'],spider),
+			producer=self.list_format(item['producer'],spider),
 			source=item['source'],
 			#createTime=self.getNowTime()
 			)
@@ -61,9 +71,10 @@ class MysqlPipeline(object):
 				
 				#写入ES
 				json_data=json.dumps(media.to_dict(),ensure_ascii=False)#转换成json数组写入es
-				import_to_es("mediacloud","mediainfo",media_id,json_data)
+				import_to_es("mediacloud","mc_mediainfo",media_id,json_data)
 			except Exception, e:
-				print e
+				#print e
+				self.write_file_content(settings['LOG_FILE'],'----------保存失败，info'+str(e),'a+')
 				self.session.rollback()
 		
 
@@ -72,7 +83,8 @@ class MysqlPipeline(object):
 
 	def list_format(self,input,spider):
 		if spider.name!='Baidu':
-			return ','.join(input)
+			#return '|'.join(input)
+			return ','.join(str(i) for i in input)
 		else:
 			return input
 
@@ -80,6 +92,13 @@ class MysqlPipeline(object):
 		return time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
 
 	def write_file_content(self, filepath, text, mode='w'):
-		file_object = open(filepath, mode)
+		date = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+		file_object = open(filepath+date+'.log', mode)
 		file_object.write(text)
 		file_object.close()
+
+
+
+
+
+

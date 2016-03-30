@@ -3,43 +3,32 @@
 import scrapy 
 from scrapy.item import Item,Field
 from model.mediaItem import MediaItem
-#from scrapy.spiders import CrawlSpider, Rule
-from scrapy.spiders import Spider
+from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy import signals, log
-from scrapy.http import Request
 import urlparse
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-class IqiyiSpider(Spider):
-	name="Iqiyi"
-	rule = None
+class MgtvSpider(CrawlSpider):
+	name="Mgtv"
 
-	def __init__(self, rule = None, *args, **kwargs):
-		self.allowed_domains=['%s' % (rule.allowed_domains)]
-		if rule.id == '1':
-			self.start_urls=['http://list.iqiyi.com/www/1/-------------4-%s-1-iqiyi--.html' % p for p in xrange(1,30)]
-		elif rule.id == '9' or rule.id =='12':
-			self.start_urls=['http://list.iqiyi.com/www/2/-------------4-%s-1-iqiyi--.html' % p for p in xrange(1,30)]
-		else:
-			self.start_urls=['http://list.iqiyi.com/www/6/-------------4-%s-1-iqiyi--.html' % p for p in xrange(1,30)]
-		self.spider_desc=rule.spider_desc
-		self.rule = rule
-		super(IqiyiSpider,self).__init__(*args, **kwargs)
+	def __init__(self,rule):
+		self.rule=rule
+		self.name=rule.spider_name
+		self.allowed_domains=rule.allowed_domains.split(",")
+		self.start_urls=rule.start_urls.split(",")
+		rule_list=[]
 
-
-	def parse(self,response):
-		move_list = response.xpath('//div[@class="wrapper-piclist"]/ul/li/div[1]/a/@href')
-		for move in move_list:
-			yield Request(move.extract(), callback = self.parse_movies_item)
-
-		next_pages = response.xpath(self.rule.next_page_xpath)
-		if next_pages:
-			next_page = urlparse.urljoin('http://list.iqiyi.com', next_pages[0].extract().strip())
-			yield Request(next_page, callback = self.parse)
+		if rule.next_page_xpath:
+			rule_list.append(Rule(LinkExtractor(restrict_xpaths=rule.next_page_xpath)))
+		rule_list.append(Rule(LinkExtractor(
+			allow=[rule.allow_url]),
+			callback='parse_movies_item'))
+		self.rules=tuple(rule_list)
+		super(MgtvSpider,self).__init__()
 
 
 	def parse_movies_item(self,response):
@@ -209,14 +198,3 @@ class IqiyiSpider(Spider):
 			item['source']='未知'
 		
 		yield item
-
-
-
-
-
-
-
-
-
-
-

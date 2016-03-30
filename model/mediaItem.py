@@ -30,3 +30,6 @@ class MediaItem(Item):
 	createTime=Field()
 	updateTime=Field()
 	updator=Field()
+	playTime=Field()
+	television=Field()
+	producer=Field()

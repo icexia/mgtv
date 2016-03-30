@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from spiders.iqiyi_spider import MgtvSpider
+from spiders.iqiyi_spider import IqiyiSpider
 from spiders.baidu_spider import BaiduSpider
+from spiders.common_spider import MgtvSpider
+from spiders.youku_spider import YoukuSpider
 from model.config import DBSession
 from model.rule import Rule
 from scrapy.crawler import CrawlerProcess
@@ -23,6 +25,10 @@ rules = db.query(Rule).filter(Rule.status == 1)
 for rule in rules:
 	if rule.allowed_domains=='v.baidu.com':
 		process.crawl(BaiduSpider,rule)
+	elif rule.allowed_domains == 'iqiyi.com':
+		process.crawl(IqiyiSpider,rule)
+	elif rule.allowed_domains == 'youku.com':
+		process.crawl(YoukuSpider,rule)
 	else:
 		process.crawl(MgtvSpider,rule)
 process.start()

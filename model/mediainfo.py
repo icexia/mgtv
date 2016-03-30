@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base=declarative_base()
 
 class MediaInfo(Base):
-	__tablename__='MC_MediaInfo'
+	__tablename__='mc_mediainfo'
 
 	id=Column(Integer,primary_key=True)
 	title=Column(String)
@@ -37,6 +37,9 @@ class MediaInfo(Base):
 	createTime=Column(DateTime)
 	updateTime=Column(DateTime)
 	updator=Column(String)
+	playTime=Column(String)
+	television=Column(String)
+	producer=Column(String)
 
 	def to_dict(self):
 		return {c.name: getattr(self, c.name, None) for c in self.__table__.columns}

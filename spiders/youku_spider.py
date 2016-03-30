@@ -2,70 +2,62 @@
 
 import scrapy 
 from scrapy.item import Item,Field
-from scrapy.spiders import CrawlSpider, Rule
+from model.mediaItem import MediaItem
+#from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import Spider
 from scrapy.linkextractors import LinkExtractor
 from scrapy import signals, log
+from scrapy.http import Request
+import urlparse
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-class MediaItem(Item):
-	url=Field()
-	title=Field()
-	eName=Field()
-	otherName=Field()
-	adaptor=Field()
-	director=Field()
-	leader=Field()
-	kind=Field()
-	language=Field()
-	duration=Field()
-	story=Field()
-	keyWord=Field()
-	productPerson=Field()
-	dubbing=Field()
-	executiver=Field()
-	original=Field()
-	productColtd=Field()
-	productionTime=Field()
-	licence=Field()
-	registration=Field()
-	distributColtd=Field()
-	source=Field()
-	createTime=Field()
-	updateTime=Field()
-	updator=Field()
+
+class YoukuSpider(Spider):
+	name="Youku"
+	rule = None
+
+	def __init__(self, rule = None, *args, **kwargs):
+		self.allowed_domains=['%s' % (rule.allowed_domains)]
+		self.start_urls=['http://www.youku.com/v_olist/c_96_g__a__sg__mt__lg__q__s_6_r_0_u_0_pt_0_av_0_ag_0_sg__pr__h__d_1_p_%s.html' % p for p in xrange(2,30)]
+		self.spider_desc=rule.spider_desc
+		self.rule = rule
+		self.headers={
+			'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',\
+			'Accept-Encoding':'gzip, deflate, sdch',\
+			'Accept-Language':'zh-CN,zh;q=0.8',\
+			'Cache-Control':'max-age=0',\
+			'Connection':'keep-alive',\
+			'Host':'www.youku.com',\
+			'Referer':self.start_urls,\
+			'Upgrade-Insecure-Requests':'1',\
+			'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36',\
+		}
+		super(YoukuSpider,self).__init__(*args, **kwargs)
 
 
-class MgtvSpider(CrawlSpider):
-	name="Mgtv"
+	def parse(self,response):
+		move_list = response.xpath(self.rule.allow_url)
+		for move in move_list:
+			yield Request(move.extract(), callback = self.parse_movies_item)
 
-	def __init__(self,rule):
-		self.rule=rule
-		self.name=rule.spider_name
-		self.allowed_domains=rule.allowed_domains.split(",")
-		self.start_urls=rule.start_urls.split(",")
-		rule_list=[]
-
-		# if rule.next_page_xpath:
-		# 	rule_list.append(Rule(LinkExtractor(restrict_xpaths=rule.next_page_xpath)))
-		rule_list.append(Rule(LinkExtractor(
-			allow=[rule.allow_url]),
-			callback='parse_movies_item'))
-		self.rules=tuple(rule_list)
-		super(MgtvSpider,self).__init__()
+		next_pages = response.xpath(self.rule.next_page_xpath)
+		if next_pages:
+			next_page = urlparse.urljoin('http://www.youku.com/', next_pages[0].extract().strip())
+			yield Request(next_page, callback = self.parse)
 
 
 	def parse_movies_item(self,response):
 		item=MediaItem()
-
+		print 1111111111111
 		if self.rule.title_xpath:
 			title=response.xpath(self.rule.title_xpath).extract()
 			item['title']=title if title else ""
 		else:
 			item['title']=""
 
-		item['url']=response.url
+		item['page_url']=response.url
 
 		if self.rule.e_name_xpath:
 			eName=response.xpath(self.rule.e_name_xpath).extract()
@@ -180,8 +172,46 @@ class MgtvSpider(CrawlSpider):
 			item['distributColtd']=distributColtd if distributColtd else ""
 		else:
 			item['distributColtd']=""
+
+		if self.rule.totalNumber_xpath:
+			totalNumber=response.xpath(self.rule.totalNumber_xpath).extract()
+			item['totalNumber']=totalNumber if totalNumber else ""
+		else:
+			item['totalNumber']=""
+
+		if self.rule.updateInfo_xpath:
+			updateInfo=response.xpath(self.rule.updateInfo_xpath).extract()
+			item['updateInfo']=updateInfo if updateInfo else ""
+		else:
+			item['updateInfo']=""
+
+		if self.rule.area_xpath:
+			area=response.xpath(self.rule.area_xpath).extract()
+			item['area']=area if area else ""
+		else:
+			item['area']=""
+
+		if self.rule.playTime_xpath:
+			playTime=response.xpath(self.rule.playTime_xpath).extract()
+			item['playTime']=playTime if playTime else ""
+		else:
+			item['playTime']=""
+
+		if self.rule.television_xpath:
+			television=response.xpath(self.rule.television_xpath).extract()
+			item['television']=television if television else ""
+		else:
+			item['television']=""
+
+		if self.rule.producer_xpath:
+			producer=response.xpath(self.rule.producer_xpath).extract()
+			item['producer']=producer if producer else ""
+		else:
+			item['producer']=""
+
+		if self.rule.spider_desc:
+			item['source']=self.rule.spider_desc
+		else:
+			item['source']='未知'
 		
-		return item
-
-
-
+		yield item
