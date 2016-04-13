@@ -3,6 +3,7 @@ from spiders.iqiyi_spider import IqiyiSpider
 from spiders.baidu_spider import BaiduSpider
 from spiders.common_spider import MgtvSpider
 from spiders.youku_spider import YoukuSpider
+from spiders.douban_spider import DoubanSpider
 from model.config import DBSession
 from model.rule import Rule
 from scrapy.crawler import CrawlerProcess
@@ -29,6 +30,8 @@ for rule in rules:
 		process.crawl(IqiyiSpider,rule)
 	elif rule.allowed_domains == 'youku.com':
 		process.crawl(YoukuSpider,rule)
+	elif rule.allowed_domains == 'douban.com':
+		process.crawl(DoubanSpider,rule)
 	else:
 		process.crawl(MgtvSpider,rule)
 process.start()

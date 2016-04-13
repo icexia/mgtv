@@ -83,8 +83,8 @@ class MysqlPipeline(object):
 
 	def list_format(self,input,spider):
 		if spider.name!='Baidu':
-			#return '|'.join(input)
-			return ','.join(str(i) for i in input)
+			return ','.join(input)
+			#return ','.join(str(i) for i in input)
 		else:
 			return input
 
@@ -96,6 +96,7 @@ class MysqlPipeline(object):
 		file_object = open(filepath+date+'.log', mode)
 		file_object.write(text)
 		file_object.close()
+
 
 
 

@@ -7,3 +7,5 @@ PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 LOG_FILE='/mnt/hgfs/Scrapy/mgtv/mgtv/logs/'
 LOG_ENABLED=True
 
+DOWNLOAD_DELAY=3
+
